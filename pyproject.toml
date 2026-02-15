@@ -1,0 +1,9 @@
+[project]
+name = "wulfram2-protocol"
+version = "0.1.0"
+description = "Wulfram 2 shared protocol layer"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
