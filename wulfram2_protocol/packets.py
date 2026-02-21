@@ -259,6 +259,8 @@ def write_update_array_entity(bw,
                               include_pos: bool,
                               include_vel: bool,
                               include_rot: bool,
+                              include_spin: bool = False,
+                              spin=(0.0, 0.0, 0.0),
                               include_entity_vitals: bool = False,
                               speed_scale: float = 1.0,
                               fuel: float = 1.0) -> None:
@@ -273,6 +275,8 @@ def write_update_array_entity(bw,
         update_mask |= (1 << 2)
     if include_rot:
         update_mask |= (1 << 3)
+    if include_spin:
+        update_mask |= (1 << 4)
     if include_entity_vitals:
         update_mask |= (1 << 5)
         update_mask |= (1 << 7)
@@ -294,6 +298,11 @@ def write_update_array_entity(bw,
         bw.write_bits(4, 15)
         for v in rot:
             bw.write_bits(16, compress_value(v, VEC_ROT_MAX, VEC_ROT_RANGE, total_bits=16))
+
+    if include_spin:
+        bw.write_bits(4, 15)
+        for v in spin:
+            bw.write_bits(16, compress_value(v, VEC_SPIN_MAX, VEC_SPIN_RANGE, total_bits=16))
 
     if include_entity_vitals:
         if ENTITY_VITALS_MODE in ("health", "vitals"):
