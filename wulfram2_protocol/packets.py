@@ -47,6 +47,20 @@ class PacketType:
     ACTION_DUMP = 0x09
     ACTION_UPDATE = 0x0A
 
+    # Additional protocol packets
+    TRANSIENT_ARRAY = 0x0D
+    SHIP_STATUS = 0x27
+    CARRYING_INFO = 0x29
+    UPLINK_INFO = 0x2A
+    WARP_STATUS = 0x30
+    CONTINUOUS_SOUND = 0x31
+    STRING_VALUE = 0x36
+    VERSION_ERROR = 0x37
+    RESET_GAME = 0x3F
+    SHUTDOWN = 0x41
+    MILTAB = 0x50
+    VIDEOMSG = 0x53
+
 
 # ============ Packet Name Lookup ============
 
@@ -78,8 +92,20 @@ PACKET_NAMES = {
     0x33: "TRANSLATION_ACK",
     0x35: "VIEWPOINT_INFO",
     0x39: "WANT_UPDATES",
+    0x0D: "TRANSIENT_ARRAY",
+    0x27: "SHIP_STATUS",
+    0x29: "CARRYING_INFO",
+    0x2A: "UPLINK_INFO",
+    0x30: "WARP_STATUS",
+    0x31: "CONTINUOUS_SOUND",
+    0x36: "STRING_VALUE",
+    0x37: "VERSION_ERROR",
     0x3a: "BEACON_REQ",
+    0x3F: "RESET_GAME",
+    0x41: "SHUTDOWN",
     0x4D: "IDENTIFIED_UDP",
+    0x50: "MILTAB",
+    0x53: "VIDEOMSG",
     0x4E: "BPS",
     0x4F: "KUDOS",
     0x54: "VOICE_DATA",
