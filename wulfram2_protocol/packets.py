@@ -20,7 +20,14 @@ def _read_float_env(name: str, default: float) -> float:
 
 class PacketType:
     """Wire packet type opcodes."""
+    # D_ protocol (service-layer control over UDP)
+    D_IGNORE = 0x01
+    D_ACK = 0x02
+    D_HANDSHAKE = 0x03
+    D_SET_START = 0x04
+
     # Core protocol
+    D_PROTOCOL = 0x08
     HELLO = 0x13
     PLAYER = 0x17
     PLAYER_INFO = 0x18  # Spawns local player vehicle
@@ -31,21 +38,30 @@ class PacketType:
     GAME_CLOCK = 0x2F
     COMM_MESSAGE = 0x1F
     LOGIN_STATUS = 0x22
+    MOTD = 0x23
+    REQUEST_START = 0x23  # Decompile name; legacy code often calls this MOTD
     LOGIN_REQUEST = 0x21
     BEHAVIOR = 0x24
     REINCARNATE = 0x25
+    RETARGET = 0x26
     TEAM_INFO = 0x28
+    DROP_REQUEST = 0x2B
+    WEAPON_DEMAND = 0x2E
     TRANSLATION = 0x32
     WANT_UPDATES = 0x39
     IDENTIFIED_UDP = 0x4D
     BPS = 0x4E
     UPDATE_ARRAY = 0x0E
+    UPDATE_ARRAY_STREAM = 0x10
     WORLD_STATS = 0x16
     PING_REQUEST = 0x0B
+    STATE_REQUEST = 0x0C
     VIEW_UPDATE = 0x0F
     DELETE_OBJECT = 0x15
     ACTION_DUMP = 0x09
     ACTION_UPDATE = 0x0A
+    INPUT_FEEDBACK = 0x40
+    DEBUG_SYNC = 0x60
 
     # Additional protocol packets
     TRANSIENT_ARRAY = 0x0D
@@ -58,41 +74,65 @@ class PacketType:
     VERSION_ERROR = 0x37
     RESET_GAME = 0x3F
     SHUTDOWN = 0x41
+    ROUTING_PING = 0x4C
     MILTAB = 0x50
     VIDEOMSG = 0x53
+    DEBUG_COORDS = 0x55
 
 
 # ============ Packet Name Lookup ============
 
 PACKET_NAMES = {
+    0x00: "STREAM_CHECK",
+    0x01: "D_IGNORE",
+    0x02: "D_ACK",
+    0x03: "D_HANDSHAKE",
+    0x04: "D_SET_START",
+    0x05: "D_TYPE5",
+    0x06: "D_TYPE6",
+    0x07: "D_TYPE7",
     0x08: "HELLO_ACK",
     0x09: "ACTION_DUMP",
     0x0A: "ACTION_UPDATE",
     0x0B: "PING_REQUEST",
-    0x0F: "VIEW_UPDATE",
+    0x0C: "STATE_REQUEST",
+    0x0D: "TRANSIENT_ARRAY",
     0x0E: "UPDATE_ARRAY",
+    0x0F: "VIEW_UPDATE",
+    0x10: "UPDATE_ARRAY_STREAM",
+    0x11: "HUD_MESSAGE",
+    0x12: "LAG_FIX",
     0x13: "HELLO",
+    0x14: "HIDE_OBJECT",
     0x15: "DELETE_OBJECT",
     0x16: "WORLD_STATS",
     0x17: "PLAYER",
     0x18: "TANK",
     0x19: "TANK_RESEND",
     0x1A: "ADD_TO_ROSTER",
+    0x1B: "REMOVE_FROM_ROSTER",
     0x1C: "UPDATE_STATS",
+    0x1D: "DEATH_NOTICE",
     0x1E: "BIRTH_NOTICE",
     0x2F: "GAME_CLOCK",
     0x1F: "COMM_MESSAGE",
     0x20: "CHAT",
     0x21: "LOGIN_REQUEST",
     0x22: "LOGIN_STATUS",
+    0x23: "REQUEST_START",
     0x24: "BEHAVIOR",
     0x25: "REINCARNATE",
+    0x26: "RETARGET",
     0x28: "TEAM_INFO",
+    0x2B: "DROP_REQUEST",
+    0x2C: "SPACE_MAP_UPDATE",
+    0x2D: "SUPPLY_SHIP_INFO",
+    0x2E: "WEAPON_DEMAND",
     0x32: "TRANSLATION",
     0x33: "TRANSLATION_ACK",
+    0x34: "MODEM",
     0x35: "VIEWPOINT_INFO",
     0x39: "WANT_UPDATES",
-    0x0D: "TRANSIENT_ARRAY",
     0x27: "SHIP_STATUS",
     0x29: "CARRYING_INFO",
     0x2A: "UPLINK_INFO",
@@ -100,15 +140,24 @@ PACKET_NAMES = {
     0x31: "CONTINUOUS_SOUND",
     0x36: "STRING_VALUE",
     0x37: "VERSION_ERROR",
+    0x38: "DOCKING",
     0x3a: "BEACON_REQ",
+    0x3B: "BEACON_MODIFY",
+    0x3C: "BEACON_STATUS",
+    0x3D: "BEACON_DELETE",
+    0x3E: "LOAD_STATUS",
     0x3F: "RESET_GAME",
+    0x40: "INPUT_FEEDBACK",
     0x41: "SHUTDOWN",
+    0x4C: "ROUTING_PING",
     0x4D: "IDENTIFIED_UDP",
+    0x55: "DEBUG_COORDS",
     0x50: "MILTAB",
     0x53: "VIDEOMSG",
     0x4E: "BPS",
     0x4F: "KUDOS",
     0x54: "VOICE_DATA",
+    0x60: "DEBUG_SYNC",
 }
 
 

@@ -6,6 +6,8 @@ Sources:
 - Server empirical tuning (marked where decomp disagrees)
 """
 
+from .entities import EntityType, VEHICLE_PHYSICS_CONFIGS
+
 # ============ Tick / Timing ============
 
 TICK_RATE_HZ = 30
@@ -23,8 +25,8 @@ SUBSTEP_SPLIT_THRESHOLD = 0.08  # Split to half-step above this
 ANGULAR_DAMP_COEFF = 2.0
 
 # Linear velocity damping
-COASTING_DAMP = 2.0            # 0x40000000 at Vehicles.c:932 — no throttle
-DRIVING_DAMP = 0.8             # empirical match — with throttle
+COASTING_DAMP = 2.0            # 0x40000000 at Vehicles.c:932 - no throttle
+DRIVING_DAMP = 0.8             # empirical match - with throttle
 # NOTE: Decomp shows DRIVING_FRICTION = 0.1 (0x3dcccccd at +0x74)
 # but server uses 0.8 which matches actual client behavior.
 # These may reference different things (friction vs damp).
@@ -35,13 +37,13 @@ DAMPING_MULTIPLIER = 1.4137167  # entity+0x98
 
 # ============ Position / Velocity Limits ============
 
-VEC_POS_MAX = 8192.0           # Position quantizer max (±8192 world units)
+VEC_POS_MAX = 8192.0           # Position quantizer max (+/-8192 world units)
 STEADY_STATE_SPEED = 64.8      # u/s at full throttle with driving_damp=0.8
 
 
 # ============ Gravity ============
 
-GRAVITY_ACCEL = -50.0          # units/s² (server default)
+GRAVITY_ACCEL = -50.0          # units/s^2 (server default)
 GROUND_LEVEL = 5.0             # Default ground Z (before terrain heightmap)
 TERRAIN_HEIGHT_OFFSET = 5.0    # Added to heightmap Z for entity position
 
@@ -49,10 +51,13 @@ TERRAIN_HEIGHT_OFFSET = 5.0    # Added to heightmap Z for entity position
 # ============ Behavior Defaults ============
 # From BEHAVIOR packet Section 6 (Active Vehicle Physics)
 
-TANK_TURN_ADJUST = 4.25        # Calibrated: 0.00° heading error over 3s
-TANK_MOVE_ADJUST = 85.0
-TANK_STRAFE_ADJUST = 69.7
-TANK_MAX_VELOCITY = 80.0
-TANK_LOW_FUEL_LEVEL = 2000.0
-TANK_MAX_ALTITUDE = 3.25
-TANK_GRAVITY_PCT = 1.0
+_TANK_CONFIG = VEHICLE_PHYSICS_CONFIGS[EntityType.TANK]
+
+# Compatibility shim: canonical values live in entities.VEHICLE_PHYSICS_CONFIGS.
+TANK_TURN_ADJUST = _TANK_CONFIG.turn_adjust
+TANK_MOVE_ADJUST = _TANK_CONFIG.move_adjust
+TANK_STRAFE_ADJUST = _TANK_CONFIG.strafe_adjust
+TANK_MAX_VELOCITY = _TANK_CONFIG.max_velocity
+TANK_LOW_FUEL_LEVEL = _TANK_CONFIG.low_fuel_level
+TANK_MAX_ALTITUDE = _TANK_CONFIG.max_altitude
+TANK_GRAVITY_PCT = _TANK_CONFIG.gravity_pct

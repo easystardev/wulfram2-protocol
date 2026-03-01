@@ -29,8 +29,8 @@ class Quantizer:
     """A single quantizer configuration entry."""
     index: int
     name: str
-    fixed_bits: int      # Precision header bits (0 for scalars)
-    total_bits: int      # Max data bits per value
+    fixed_bits: int      # Primary bit count
+    total_bits: int      # Secondary max_total_bits (0 for scalars)
     max_value: float     # Upper bound of range
     range_value: float   # Total range (max - min)
     group: str           # "scalar" or "vector"
@@ -39,22 +39,22 @@ class Quantizer:
 # Scalar quantizers (0-15): behavioral input axes
 # Used in ACTION_DUMP/ACTION_UPDATE for client inputs
 SCALAR_QUANTIZERS = [
-    Quantizer(0,  "unused0",       16, 16, 1000.0, 2000.0, "scalar"),  # control quantizer
-    Quantizer(1,  "weapon_id",      5,  5,    0.0,    0.0, "scalar"),  # 5-bit weapon index
-    Quantizer(2,  "unit_type",      8,  8,    0.0,    0.0, "scalar"),  # 8-bit entity type
-    Quantizer(3,  "team_id",        8,  8,    0.0,    0.0, "scalar"),  # 8-bit team
-    Quantizer(4,  "cargo_type",     8,  8,    0.0,    0.0, "scalar"),  # 8-bit cargo
-    Quantizer(5,  "health",        10, 10, HEALTH_MAX, HEALTH_RANGE, "scalar"),
-    Quantizer(6,  "scalar6",       16, 16, 1000.0, 2000.0, "scalar"),  # unknown
-    Quantizer(7,  "scalar7",       16, 16, 1000.0, 2000.0, "scalar"),  # unknown
-    Quantizer(8,  "energy",        10, 10, ENERGY_MAX, ENERGY_RANGE, "scalar"),
-    Quantizer(9,  "scalar9",       16, 16, 1000.0, 2000.0, "scalar"),  # unknown
-    Quantizer(10, "scalar10",      16, 16, 1000.0, 2000.0, "scalar"),  # unknown
-    Quantizer(11, "scalar11",      16, 16, 1000.0, 2000.0, "scalar"),  # unknown
-    Quantizer(12, "scalar12",      16, 16, 1000.0, 2000.0, "scalar"),  # unknown
-    Quantizer(13, "extra_a",        8,  8,    1.0,    1.0, "scalar"),
-    Quantizer(14, "extra_b",        8,  8,    1.0,    1.0, "scalar"),
-    Quantizer(15, "slot_index",    16, 16, 1000.0, 2000.0, "scalar"),  # ACTION_UPDATE slot idx
+    Quantizer(0,  "control",       16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(1,  "weapon_id",      5,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(2,  "entity_type",    8,  0,    1.0,    1.0, "scalar"),
+    Quantizer(3,  "parent_team",    8,  0,    1.0,    1.0, "scalar"),
+    Quantizer(4,  "scalar4",       16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(5,  "health",        10,  0, HEALTH_MAX, HEALTH_RANGE, "scalar"),
+    Quantizer(6,  "scalar6",       16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(7,  "scalar7",       16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(8,  "energy",        10,  0, ENERGY_MAX, ENERGY_RANGE, "scalar"),
+    Quantizer(9,  "scalar9",       16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(10, "scalar10",      16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(11, "scalar11",      16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(12, "scalar12",      16,  0, 1000.0, 2000.0, "scalar"),
+    Quantizer(13, "extra_a",        8,  0,    1.0,    1.0, "scalar"),
+    Quantizer(14, "extra_b",        8,  0,    1.0,    1.0, "scalar"),
+    Quantizer(15, "slot_index",    16,  0, 1000.0, 2000.0, "scalar"),
 ]
 
 # Vector quantizers (16-27): positional state

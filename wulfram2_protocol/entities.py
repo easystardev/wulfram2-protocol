@@ -17,12 +17,49 @@ class BehaviorSlot(IntEnum):
     TURNING = 1          # yaw (left/right)
     MOVING_FORWARD = 2   # W/S
     MOVING_SIDEWAYS = 3  # A/D
-    WEAPON_SELECT = 4    # Current weapon slot (5-bit quantized)
+    # NOTE: Slot 4 is NOT control-quantized in network packets.
+    # Decompile (`Game/Session/Network/Protocol.c` GUESS5_Proto_write_quantized_behavior)
+    # shows slot 4 takes the non-quantized/raw path.
+    WEAPON_SELECT = 4
     UPWARD_THRUST = 5    # Q/Z relative axis (encoded with zoom quantizer)
     SLOT6 = 6            # Unknown (control quantizer)
     SLOT7 = 7            # Unknown (control quantizer)
     FIRE = 8             # Primary fire trigger (binary)
     # Slots 9-21 are various other controls
+
+
+# Shared slot classification for ACTION_DUMP/ACTION_UPDATE encoding.
+# Keep these authoritative to avoid client/server bitstream drift.
+ACTION_ANALOG_SLOTS = frozenset({
+    BehaviorSlot.UNUSED0,
+    BehaviorSlot.TURNING,
+    BehaviorSlot.MOVING_FORWARD,
+    BehaviorSlot.MOVING_SIDEWAYS,
+    BehaviorSlot.UPWARD_THRUST,
+    BehaviorSlot.SLOT6,
+    BehaviorSlot.SLOT7,
+})
+
+# ACTION_DUMP writes UPWARD_THRUST with the zoom quantizer; this set is only
+# the slots written with the control quantizer.
+ACTION_DUMP_CONTROL_SLOTS = frozenset({
+    BehaviorSlot.UNUSED0,
+    BehaviorSlot.TURNING,
+    BehaviorSlot.MOVING_FORWARD,
+    BehaviorSlot.MOVING_SIDEWAYS,
+    BehaviorSlot.SLOT6,
+    BehaviorSlot.SLOT7,
+})
+
+
+def is_action_analog_slot(slot_idx: int) -> bool:
+    """Return True when ACTION_UPDATE should encode this slot as analog."""
+    return slot_idx in ACTION_ANALOG_SLOTS
+
+
+def is_action_dump_control_slot(slot_idx: int) -> bool:
+    """Return True when ACTION_DUMP should encode this slot with control quantizer."""
+    return slot_idx in ACTION_DUMP_CONTROL_SLOTS
 
 
 class EntityType(IntEnum):
