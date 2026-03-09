@@ -162,6 +162,15 @@ WEAPON_NAMES = {
 # Valid Tank weapon slots
 TANK_WEAPON_SLOTS = {0, 4, 5, 6, 7, 8, 9, 10, 11}
 
+# UPDATE_ARRAY / PLAYER_INFO local-state turret flags are keyed by the
+# local-state weapon/entity type value, not by the currently selected ammo slot.
+# `azurefishy-src` Replication.c reads:
+# - primary turret angle when weapon type 0 has weapon_def+0x170 set
+# - secondary turret angle when weapon type 1 has weapon_def+0x68 set
+# Keep this shared so server builders and client decoders stay aligned.
+LOCAL_STATE_PRIMARY_TURRET_WEAPON_TYPES = frozenset({0})
+LOCAL_STATE_SECONDARY_TURRET_WEAPON_TYPES = frozenset({1})
+
 
 @dataclass
 class VehiclePhysicsConfig:

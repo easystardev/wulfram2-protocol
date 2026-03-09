@@ -178,8 +178,12 @@ BEHAVIOR_WEAPON_SLOT_SIZE = 45
 
 VEC_POS_MAX = _read_float_env("WULFRAM_VEC_POS_MAX", 8192.0)
 VEC_POS_RANGE = _read_float_env("WULFRAM_VEC_POS_RANGE", 16384.0)
-VEC_VEL_MAX = _read_float_env("WULFRAM_VEC_VEL_MAX", 1000.0)
-VEC_VEL_RANGE = _read_float_env("WULFRAM_VEC_VEL_RANGE", 2000.0)
+# Decompile-backed velocity quantizer defaults:
+# max=200, range=400, 16-bit precision. A broader 1000/2000 range reduces
+# replay/update precision enough to undermine the OG client's exact
+# Prediction_verify_state velocity gate.
+VEC_VEL_MAX = _read_float_env("WULFRAM_VEC_VEL_MAX", 200.0)
+VEC_VEL_RANGE = _read_float_env("WULFRAM_VEC_VEL_RANGE", 400.0)
 VEC_ROT_MAX = _read_float_env("WULFRAM_VEC_ROT_MAX", 6.3)
 VEC_ROT_RANGE = _read_float_env("WULFRAM_VEC_ROT_RANGE", 12.6)
 VEC_SPIN_MAX = _read_float_env("WULFRAM_VEC_SPIN_MAX", 200.0)
