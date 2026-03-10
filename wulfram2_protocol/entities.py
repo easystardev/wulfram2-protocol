@@ -198,6 +198,30 @@ class VehiclePhysicsConfig:
     mass: float = 1.0                     # type_data+0x80
 
 
+def tank_low_speed_mobility_factor(current_speed: float, speed_threshold: float) -> float:
+    """Return the decompile-backed tank forward-mobility cap from current speed.
+
+    `azurefishy-src` `Tank_compute_mobility_factors` applies:
+      factor = (current_speed / speed_threshold) * 0.6 + 0.4
+    when speed is below the threshold, otherwise 1.0.
+
+    The original field is still named `low_fuel_level` in recovered debug vars,
+    but the controller uses it as a speed-domain mobility cap.
+    """
+    if speed_threshold <= 0.0:
+        return 1.0
+    if current_speed < 0.0:
+        current_speed = 0.0
+    if current_speed < speed_threshold:
+        factor = (current_speed / speed_threshold) * 0.6 + 0.4
+        if factor < 0.4:
+            return 0.4
+        if factor > 1.0:
+            return 1.0
+        return factor
+    return 1.0
+
+
 # Per-vehicle-type configs from decompile hex literals (Registry.c)
 VEHICLE_PHYSICS_CONFIGS = {
     EntityType.TANK: VehiclePhysicsConfig(
