@@ -2,7 +2,7 @@
 
 Shared Python protocol layer for the Wulfram II revival work.
 
-This repo contains the wire-format codec, packet constants, quantizer helpers, shared entity definitions, and recovered gameplay constants used by both the Python server and Python client work.
+This repo contains the wire-format codec, packet constants, quantizer helpers, shared entity definitions, and gameplay constants used by both the Python server and Python client work.
 
 ## Package
 
@@ -65,7 +65,7 @@ from wulfram2_protocol.packets import PacketType, get_packet_name
 
 This package is extracted from the larger `wolfram` workspace and is being kept public so other repos can consume the same shared protocol definitions without copying them.
 
-The current focus is decompile-backed protocol parity rather than broad packaging ergonomics.
+It is focused on interoperability: shared wire-format definitions, codec helpers, and gameplay-facing enums/constants. It does not ship original game assets or original client/server source.
 
 ## License
 

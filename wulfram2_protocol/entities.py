@@ -18,8 +18,7 @@ class BehaviorSlot(IntEnum):
     MOVING_FORWARD = 2   # W/S
     MOVING_SIDEWAYS = 3  # A/D
     # NOTE: Slot 4 is NOT control-quantized in network packets.
-    # Decompile (`Game/Session/Network/Protocol.c` GUESS5_Proto_write_quantized_behavior)
-    # shows slot 4 takes the non-quantized/raw path.
+    # Current compatibility handling keeps slot 4 on the non-quantized/raw path.
     WEAPON_SELECT = 4
     UPWARD_THRUST = 5    # Q/Z relative axis (encoded with zoom quantizer)
     SLOT6 = 6            # Unknown (control quantizer)
@@ -63,7 +62,7 @@ def is_action_dump_control_slot(slot_idx: int) -> bool:
 
 
 class EntityType(IntEnum):
-    """Entity type IDs from decompile (Registry.c EntityType_savechar_to_internal).
+    """Entity type IDs used by the shared protocol layer.
 
     Types 0-4: Vehicles (player-controllable)
     Types 5-18: Projectiles/ordnance
@@ -80,10 +79,10 @@ class EntityType(IntEnum):
     TRANSPORT = 4
 
     # Projectiles
-    FLAK_SHELL = 5         # save: 'A' — uses g_entity_physics_config_projectile
+    FLAK_SHELL = 5         # save: 'A'
     PULSE_SHELL = 6        # save: 'U'
     SHORT_MISSILE = 7      # save: 'O'
-    HUNTER = 8             # save: 'm' — uses g_entity_physics_config_projectile
+    HUNTER = 8             # save: 'm'
     HEAVY_MISSILE = 9      # save: 'M'
     MINE = 10              # save: 'i'
     PIERCER = 11           # save: 'P'
@@ -100,7 +99,7 @@ class EntityType(IntEnum):
     UPLINK = 20            # save: 'u'
     SUPPLY_SHIP = 21       # save: 'h'
 
-    # Torpedo — uses g_entity_physics_config_torpedo
+    # Torpedo
     TORPEDO = 22           # save: 'T' (0x16)
 
     # Types 23-24 unused/unknown
@@ -122,9 +121,9 @@ class EntityType(IntEnum):
 
 
 class WeaponType(IntEnum):
-    """Weapon types (ammo slot indices from decompilation).
+    """Weapon types (ammo slot indices used by current gameplay traffic).
 
-    Tank weapon slots from GUESS4_WeaponDef_init_by_entity_type:
+    Tank weapon slots currently used by shared client/server code:
     - Slot 0: Chain gun (instant hit)
     - Slot 4: Pulse cannon (projectile)
     - Slot 5: Flak
@@ -164,9 +163,9 @@ TANK_WEAPON_SLOTS = {0, 4, 5, 6, 7, 8, 9, 10, 11}
 
 # UPDATE_ARRAY / PLAYER_INFO local-state turret flags are keyed by the
 # local-state weapon/entity type value, not by the currently selected ammo slot.
-# `azurefishy-src` Replication.c reads:
-# - primary turret angle when weapon type 0 has weapon_def+0x170 set
-# - secondary turret angle when weapon type 1 has weapon_def+0x68 set
+# Shared local-state interpretation:
+# - primary turret angle when local-state weapon type 0 is active
+# - secondary turret angle when local-state weapon type 1 is active
 # Keep this shared so server builders and client decoders stay aligned.
 LOCAL_STATE_PRIMARY_TURRET_WEAPON_TYPES = frozenset({0})
 LOCAL_STATE_SECONDARY_TURRET_WEAPON_TYPES = frozenset({1})
@@ -174,39 +173,36 @@ LOCAL_STATE_SECONDARY_TURRET_WEAPON_TYPES = frozenset({1})
 
 @dataclass
 class VehiclePhysicsConfig:
-    """Per-vehicle-type physics constants from decompile (VehiclePhysics_init_*).
+    """Per-vehicle-type physics constants shared by client and server code.
 
-    Offsets reference the VehiclePhysicsConfig struct in the original binary.
-    Static values are set in VehiclePhysics_init_tank / _init_medic etc.
-    Runtime values (damping, mass) come from PhysicsConfig type_data, set
-    during entity creation — NOT from the static init (which zeroes +0x54-0x78).
+    Static values cover movement and altitude behavior. Runtime values cover
+    damping and mass used by the public Python simulation path.
     """
-    # Static config from VehiclePhysics_init_* (hex-confirmed)
-    turn_adjust: float      # +0x10 — angular acceleration multiplier
-    move_adjust: float      # +0x18 — forward acceleration multiplier
-    strafe_adjust: float    # +0x20 — strafe acceleration multiplier
-    max_velocity: float     # +0x28 — velocity clamp
-    low_fuel_level: float   # +0x30 — fuel warning threshold
-    max_altitude: float     # +0x38 — max hover height
-    gravity_pct: float      # +0x40 — gravity multiplier (1.0 = normal)
+    # Static config
+    turn_adjust: float      # angular acceleration multiplier
+    move_adjust: float      # forward acceleration multiplier
+    strafe_adjust: float    # strafe acceleration multiplier
+    max_velocity: float     # velocity clamp
+    low_fuel_level: float   # retained compatibility field name
+    max_altitude: float     # max hover height
+    gravity_pct: float      # gravity multiplier (1.0 = normal)
 
-    # Runtime physics (from PhysicsConfig type_data, NOT static init)
-    # Accessed via entity+0xBC → PhysicsState → +4 → type_data → offset
+    # Runtime physics
     linear_damping_driving: float = 0.8   # ground_friction * terrain_scale (flat ground)
-    linear_damping_coasting: float = 2.0  # hardcoded at Vehicles.c:932
-    angular_damping: float = 2.0          # type_data+0x7C (set at runtime, zeroed in static init)
-    mass: float = 1.0                     # type_data+0x80
+    linear_damping_coasting: float = 2.0  # coasting / no-throttle path
+    angular_damping: float = 2.0          # runtime angular damping
+    mass: float = 1.0                     # runtime mass scalar
 
 
 def tank_low_speed_mobility_factor(current_speed: float, speed_threshold: float) -> float:
-    """Return the decompile-backed tank forward-mobility cap from current speed.
+    """Return the tank forward-mobility cap from current speed.
 
-    `azurefishy-src` `Tank_compute_mobility_factors` applies:
+    The current compatibility path applies:
       factor = (current_speed / speed_threshold) * 0.6 + 0.4
     when speed is below the threshold, otherwise 1.0.
 
-    The original field is still named `low_fuel_level` in recovered debug vars,
-    but the controller uses it as a speed-domain mobility cap.
+    The field name remains `low_fuel_level` for compatibility with the existing
+    shared config shape even though the controller uses it as a speed-domain cap.
     """
     if speed_threshold <= 0.0:
         return 1.0
@@ -222,39 +218,38 @@ def tank_low_speed_mobility_factor(current_speed: float, speed_threshold: float)
     return 1.0
 
 
-# Per-vehicle-type configs from decompile hex literals (Registry.c)
+# Per-vehicle-type configs used by the shared runtime
 VEHICLE_PHYSICS_CONFIGS = {
     EntityType.TANK: VehiclePhysicsConfig(
-        turn_adjust=4.5,        # +0x10
-        move_adjust=85.0,       # +0x18
-        strafe_adjust=69.7,     # +0x20
-        max_velocity=80.0,      # +0x28
-        low_fuel_level=2000.0,  # +0x30
-        max_altitude=3.25,      # +0x38
-        gravity_pct=1.0,        # +0x40
+        turn_adjust=4.5,
+        move_adjust=85.0,
+        strafe_adjust=69.7,
+        max_velocity=80.0,
+        low_fuel_level=2000.0,
+        max_altitude=3.25,
+        gravity_pct=1.0,
     ),
     EntityType.SCOUT: VehiclePhysicsConfig(
-        turn_adjust=4.5,        # +0x10 — same as tank
-        move_adjust=85.0,       # +0x18 — same as tank
-        strafe_adjust=38.0,     # +0x20 — lower than tank (69.7)
-        max_velocity=72.0,      # +0x28 — different semantics
-        low_fuel_level=2000.0,  # +0x38 — offset shifted in medic struct
-        max_altitude=4.9,       # +0x40 — higher than tank (3.25)
-        gravity_pct=1.0,        # +0x50
+        turn_adjust=4.5,
+        move_adjust=85.0,
+        strafe_adjust=38.0,
+        max_velocity=72.0,
+        low_fuel_level=2000.0,
+        max_altitude=4.9,
+        gravity_pct=1.0,
     ),
 }
 
 
 class EntityPhysicsMode(IntEnum):
-    """Physics config modes from decompile globals.
+    """Physics config modes used by the shared runtime.
 
-    Three global configs exist: default (most entities), projectile (FlakShell,
-    Hunter), torpedo. The mode determines integration behavior, damping flags,
-    and collision response.
+    The mode determines integration behavior, damping flags, and collision
+    response for broad entity categories.
     """
-    DEFAULT = 0       # g_entity_physics_config_default — standard entities
-    PROJECTILE = 1    # g_entity_physics_config_projectile — types 5 (FlakShell), 8 (Hunter)
-    TORPEDO = 2       # g_entity_physics_config_torpedo — type 22 (Torpedo)
+    DEFAULT = 0       # standard entities
+    PROJECTILE = 1    # projectile-style entities
+    TORPEDO = 2       # torpedo-style entities
 
 
 # Map entity types to their physics mode

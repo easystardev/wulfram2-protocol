@@ -9,7 +9,7 @@ and UPDATE_ARRAY/ACTION_DUMP decoding. Two groups:
 Sources:
 1. Server packets.py TRANSLATION builder
 2. Server weapons.py behavior input decoding
-3. Decomp Protocol.c GUESS5_ValueQuantizerArray_init (authoritative)
+3. Shared interoperability testing and packet analysis
 """
 
 from dataclasses import dataclass

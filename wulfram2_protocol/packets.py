@@ -39,7 +39,7 @@ class PacketType:
     COMM_MESSAGE = 0x1F
     LOGIN_STATUS = 0x22
     MOTD = 0x23
-    REQUEST_START = 0x23  # Decompile name; legacy code often calls this MOTD
+    REQUEST_START = 0x23  # Legacy alias; older code often calls this MOTD
     LOGIN_REQUEST = 0x21
     BEHAVIOR = 0x24
     REINCARNATE = 0x25
@@ -178,10 +178,10 @@ BEHAVIOR_WEAPON_SLOT_SIZE = 45
 
 VEC_POS_MAX = _read_float_env("WULFRAM_VEC_POS_MAX", 8192.0)
 VEC_POS_RANGE = _read_float_env("WULFRAM_VEC_POS_RANGE", 16384.0)
-# Decompile-backed velocity quantizer defaults:
+# Current shared velocity quantizer defaults:
 # max=200, range=400, 16-bit precision. A broader 1000/2000 range reduces
-# replay/update precision enough to undermine the OG client's exact
-# Prediction_verify_state velocity gate.
+# replay/update precision enough to undermine the old client's tighter
+# replay validation path.
 VEC_VEL_MAX = _read_float_env("WULFRAM_VEC_VEL_MAX", 200.0)
 VEC_VEL_RANGE = _read_float_env("WULFRAM_VEC_VEL_RANGE", 400.0)
 VEC_ROT_MAX = _read_float_env("WULFRAM_VEC_ROT_MAX", 6.3)
@@ -298,7 +298,7 @@ def write_local_player_state(bw, include: bool,
                              include_ammo_turrets: bool = True) -> None:
     """Write local player state block used by UPDATE_ARRAY and PLAYER_INFO.
 
-    Format (from decomp):
+    Wire format:
     - 1 bit flag
     - weapon type (5 bits)
     - health (10 bits)

@@ -1,9 +1,8 @@
 """
 Physics and protocol constants shared between server and client.
 
-Sources:
-- Decomp Physics.c / Vehicles.c (confirmed values marked)
-- Server empirical tuning (marked where decomp disagrees)
+Values here are kept aligned with the shared runtime used by the public
+Python client/server work and adjusted when empirical behavior requires it.
 """
 
 from .entities import EntityType, VEHICLE_PHYSICS_CONFIGS
@@ -13,26 +12,24 @@ from .entities import EntityType, VEHICLE_PHYSICS_CONFIGS
 TICK_RATE_HZ = 30
 TICK_DT = 1.0 / TICK_RATE_HZ  # ~0.0333s
 
-# Physics substep limits (from decomp Physics.c)
+# Physics substep limits
 SUBSTEP_DT_MAX = 0.04          # Physics substep ceiling
 SUBSTEP_SPLIT_THRESHOLD = 0.08  # Split to half-step above this
 
 
 # ============ Damping / Friction ============
 
-# Angular velocity damping (from Physics_substep_integrate damped mode)
-# entity->0xbc->+4->+0x7c  (DAT_005730cc+0x1C)
+# Angular velocity damping
 ANGULAR_DAMP_COEFF = 2.0
 
 # Linear velocity damping
-COASTING_DAMP = 2.0            # 0x40000000 at Vehicles.c:932 - no throttle
+COASTING_DAMP = 2.0            # coasting / no-throttle path
 DRIVING_DAMP = 0.8             # empirical match - with throttle
-# NOTE: Decomp shows DRIVING_FRICTION = 0.1 (0x3dcccccd at +0x74)
-# but server uses 0.8 which matches actual client behavior.
-# These may reference different things (friction vs damp).
+# The public runtime uses 0.8 here because it matches current client behavior
+# more closely than the older exploratory value set.
 
-# Softbody damping multiplier (TankController_update)
-DAMPING_MULTIPLIER = 1.4137167  # entity+0x98
+# Softbody damping multiplier
+DAMPING_MULTIPLIER = 1.4137167
 
 
 # ============ Position / Velocity Limits ============
