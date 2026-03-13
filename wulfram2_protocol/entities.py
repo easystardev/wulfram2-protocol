@@ -197,12 +197,14 @@ class VehiclePhysicsConfig:
 def tank_low_speed_mobility_factor(current_speed: float, speed_threshold: float) -> float:
     """Return the tank forward-mobility cap from current speed.
 
-    The current compatibility path applies:
+    The compatibility path applies:
       factor = (current_speed / speed_threshold) * 0.6 + 0.4
     when speed is below the threshold, otherwise 1.0.
 
-    The field name remains `low_fuel_level` for compatibility with the existing
-    shared config shape even though the controller uses it as a speed-domain cap.
+    `azurefishy-src` still leaves the exact runtime meaning of controller
+    `+0x30` ambiguous in this path. Current empirical sync captures say the
+    older speed-threshold interpretation remains closer than reusing
+    `max_velocity` directly.
     """
     if speed_threshold <= 0.0:
         return 1.0
